@@ -1,5 +1,6 @@
 # Deployment for the flight price API.
-# Starts with 2 replicas, the HPA in hpa.yml scales it between 2 and 8 based on cpu.
+# There is no replicas field on purpose: the HPA in hpa.yml owns the number of pods (2 to 8).
+# If replicas was set here, every kubectl apply from jenkins would reset it to that number.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,7 +9,6 @@ metadata:
   labels:
     app: flight-price-api
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: flight-price-api
