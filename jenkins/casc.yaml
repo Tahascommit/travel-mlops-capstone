@@ -10,6 +10,10 @@ jenkins:
         - id: admin
           name: admin
           password: ${JENKINS_ADMIN_PASSWORD}
+        # used by the airflow dag to start a deployment, so builds show "Started by user airflow"
+        - id: airflow
+          name: airflow
+          password: ${JENKINS_AIRFLOW_PASSWORD}
   authorizationStrategy:
     loggedInUsersCanDoAnything:
       allowAnonymousRead: false
@@ -22,6 +26,11 @@ jobs:
   - script: |
       pipelineJob('flight-price-cicd') {
         description('Tests the code, packages the champion model from MLflow into the API image and deploys it to Kubernetes. Pipeline is defined in the Jenkinsfile in the repo.')
+        // same parameter as in the Jenkinsfile. declared here too so the job is parameterized right
+        // after jenkins starts, otherwise airflow's buildWithParameters call fails until the first build
+        parameters {
+          booleanParam('RETRAIN', false, 'Train a new model in this build instead of using the champion from MLflow')
+        }
         properties {
           disableConcurrentBuilds()
           pipelineTriggers {
