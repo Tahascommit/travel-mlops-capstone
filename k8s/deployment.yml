@@ -1,0 +1,52 @@
+# Deployment for the flight price API.
+# Starts with 2 replicas, the HPA in hpa.yml scales it between 2 and 8 based on cpu.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flight-price-api
+  namespace: travel-mlops
+  labels:
+    app: flight-price-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flight-price-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0   # keep serving while a new version rolls out
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: flight-price-api
+    spec:
+      containers:
+        - name: api
+          image: flight-price-api:latest
+          imagePullPolicy: IfNotPresent   # image is built locally, not pulled from a registry
+          ports:
+            - containerPort: 5000
+          env:
+            - name: MODEL_PATH
+              value: /app/models/flight_price_model.joblib
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:       # don't send traffic until the model is loaded
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:        # restart the container if it stops answering
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 10

@@ -1,0 +1,13 @@
+# Exposes the API pods. On docker desktop a LoadBalancer service is reachable on localhost:8000
+apiVersion: v1
+kind: Service
+metadata:
+  name: flight-price-api
+  namespace: travel-mlops
+spec:
+  type: LoadBalancer
+  selector:
+    app: flight-price-api
+  ports:
+    - port: 8000
+      targetPort: 5000
