@@ -8,4 +8,6 @@ RUN python -m venv /opt/ml-venv && chown -R airflow:0 /opt/ml-venv
 
 USER airflow
 COPY requirements-train.txt /tmp/requirements-train.txt
-RUN /opt/ml-venv/bin/pip install --no-cache-dir -r /tmp/requirements-train.txt
+# pendulum: airflow checks for it in the venv before running an external_python task
+# (it logs an import error otherwise), same version as airflow itself uses
+RUN /opt/ml-venv/bin/pip install --no-cache-dir -r /tmp/requirements-train.txt pendulum==3.2.0
