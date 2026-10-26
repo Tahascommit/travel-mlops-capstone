@@ -44,10 +44,12 @@ SKOPS_TRUSTED_TYPES = [
 def candidate_models():
     return {
         "linear_regression": LinearRegression(),
+        # params below come from the random search in the regression notebook
         "random_forest": RandomForestRegressor(
-            n_estimators=100, min_samples_leaf=2, n_jobs=-1, random_state=RANDOM_STATE),
+            n_estimators=100, min_samples_leaf=1, max_features=0.5, n_jobs=-1, random_state=RANDOM_STATE),
         "hist_gradient_boosting": HistGradientBoostingRegressor(
-            max_iter=300, learning_rate=0.1, random_state=RANDOM_STATE),
+            max_iter=500, learning_rate=0.2, max_leaf_nodes=63, max_depth=6,
+            l2_regularization=0.1, random_state=RANDOM_STATE),
     }
 
 
