@@ -61,7 +61,9 @@ def load_models():
 def bar_chart(df, x, y, title, horizontal=False, color=BLUE, x_title=None, y_title=None, fmt=",.0f"):
     """Simple single series bar chart with tooltips."""
     if horizontal:
-        enc = dict(y=alt.Y(f"{x}:N", sort="-x", title=y_title), x=alt.X(f"{y}:Q", title=x_title))
+        # labelLimit so long names like "Florianopolis (SC) -> Sao Paulo (SP)" are not cut off
+        enc = dict(y=alt.Y(f"{x}:N", sort="-x", title=y_title, axis=alt.Axis(labelLimit=300)),
+                   x=alt.X(f"{y}:Q", title=x_title))
     else:
         enc = dict(x=alt.X(f"{x}:N", sort="-y", title=x_title), y=alt.Y(f"{y}:Q", title=y_title))
     return (
@@ -164,7 +166,7 @@ elif page == "Travel insights":
     line = (
         alt.Chart(monthly, title="Flights per month")
         .mark_line(color=BLUE, strokeWidth=2)
-        .encode(x=alt.X("date:T", title=None), y=alt.Y("flights:Q", title="Flights"),
+        .encode(x=alt.X("date:T", title=None, axis=alt.Axis(format="%b %Y")), y=alt.Y("flights:Q", title="Flights"),
                 tooltip=[alt.Tooltip("date:T", format="%b %Y"), alt.Tooltip("flights:Q", format=",")])
     )
     left.altair_chart(line, width="stretch")
@@ -174,7 +176,7 @@ elif page == "Travel insights":
         alt.Chart(by_class, title="Average flight price by agency and class")
         .mark_bar(cornerRadiusEnd=4)
         .encode(
-            x=alt.X("agency:N", title=None),
+            x=alt.X("agency:N", title=None, axis=alt.Axis(labelAngle=0)),
             xOffset=alt.XOffset("flightType:N", sort=list(CLASS_COLORS)),
             y=alt.Y("price:Q", title="Average price (R$)"),
             color=alt.Color("flightType:N", title="Class", sort=list(CLASS_COLORS),
