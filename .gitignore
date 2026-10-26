@@ -21,3 +21,6 @@ airflow/.env
 .DS_Store
 .vscode/
 .idea/
+
+# local secrets
+.env

@@ -70,15 +70,20 @@ def file_md5(path):
     return h.hexdigest()
 
 
-def promote_if_better(client, version, rmse):
-    """Point the champion alias to this version if it has a lower RMSE than the current one."""
+def promote_if_better(client, version, rmse, tolerance=0.01):
+    """Point the champion alias to this version unless it is clearly worse than the current one.
+
+    A retrained model that is about as good as the champion still gets promoted, since it was
+    trained on newer data. "About as good" = RMSE at most 1% higher (plus a tiny absolute margin
+    because the random forest gets an RMSE of ~1e-12 and float noise would decide otherwise).
+    """
     try:
         current = client.get_model_version_by_alias(REGISTERED_MODEL_NAME, "champion")
         current_rmse = client.get_run(current.run_id).data.metrics["rmse"]
     except Exception:
         current, current_rmse = None, float("inf")
 
-    if rmse <= current_rmse:
+    if rmse <= current_rmse * (1 + tolerance) + 1e-6:
         client.set_registered_model_alias(REGISTERED_MODEL_NAME, "champion", version)
         return True
     print(f"kept champion v{current.version} (rmse {current_rmse:.3f}) over v{version} (rmse {rmse:.3f})")
