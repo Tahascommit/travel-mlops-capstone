@@ -105,7 +105,9 @@ def flight_price_training_pipeline():
         crumb.raise_for_status()
         crumb = crumb.json()
 
-        res = session.post(f"{url}/job/{job}/build",
+        # the job has a RETRAIN parameter, so it has to be started with buildWithParameters.
+        # RETRAIN=false because we just trained, jenkins only needs to ship the new champion
+        res = session.post(f"{url}/job/{job}/buildWithParameters", params={"RETRAIN": "false"},
                            headers={crumb["crumbRequestField"]: crumb["crumb"]}, timeout=15)
         res.raise_for_status()
         queued = res.headers.get("Location", "")
