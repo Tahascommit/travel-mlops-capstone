@@ -22,12 +22,19 @@ spec:
       labels:
         app: flight-price-api
     spec:
+      terminationGracePeriodSeconds: 30
       containers:
         - name: api
           image: flight-price-api:latest
           imagePullPolicy: IfNotPresent   # image is built locally, not pulled from a registry
           ports:
             - containerPort: 5000
+          lifecycle:
+            # during a rollout the old pod can still get a few requests before the service
+            # stops routing to it. waiting a bit before shutting down avoids dropped requests
+            preStop:
+              exec:
+                command: ["sleep", "8"]
           env:
             - name: MODEL_PATH
               value: /app/models/flight_price_model.joblib
