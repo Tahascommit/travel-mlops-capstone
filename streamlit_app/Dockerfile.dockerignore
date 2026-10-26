@@ -1,0 +1,12 @@
+# ignore file used only when building streamlit_app/Dockerfile
+.git
+.venv
+**/__pycache__
+notebooks
+docs
+mlruns
+mlflow.db
+airflow
+jenkins
+k8s
+tests
