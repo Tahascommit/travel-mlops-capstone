@@ -60,6 +60,8 @@ def create_app(model_path=None):
         REQUESTS.labels("/model-info", 200).inc()
         return jsonify(
             model_name=bundle["model_name"],
+            # set when the model came from the mlflow registry (export_champion), else it was trained locally
+            registry_version=bundle.get("registry_version", "local"),
             trained_at=bundle["trained_at"],
             data_md5=bundle["data_md5"],
             test_metrics=bundle["metrics"],

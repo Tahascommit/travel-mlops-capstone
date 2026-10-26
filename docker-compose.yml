@@ -1,0 +1,35 @@
+# Platform services for the project: MLflow tracking server, Airflow and Jenkins.
+#
+#   docker compose up -d            start everything
+#   docker compose up -d mlflow     start only mlflow
+#
+# MLflow  -> http://localhost:5001
+# Airflow -> http://localhost:8080
+# Jenkins -> http://localhost:8081
+#
+# Inside this compose network the other services reach mlflow at http://mlflow:5001
+
+services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.17.2
+    container_name: mlflow
+    command: >
+      mlflow server
+      --host 0.0.0.0 --port 5001
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --artifacts-destination /mlflow/artifacts
+      --serve-artifacts
+      --allowed-hosts localhost:5001,127.0.0.1:5001,mlflow:5001,host.docker.internal:5001
+    ports:
+      - "5001:5001"
+    volumes:
+      - mlflow-data:/mlflow
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mlflow-data:
