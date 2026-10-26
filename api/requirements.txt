@@ -1,0 +1,8 @@
+# only what the api container needs (no mlflow / jupyter etc. to keep the image small)
+flask==3.1.3
+gunicorn==26.2.0
+pandas==3.1.0
+numpy==2.5.4
+scikit-learn==1.9.1
+joblib==1.6.0
+prometheus-client==0.26.0
