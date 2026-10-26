@@ -1,0 +1,23 @@
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# mlflow local store
+mlruns/
+mlartifacts/
+mlflow.db
+
+# airflow runtime files
+airflow/logs/
+airflow/plugins/
+airflow/config/
+airflow/.env
+
+# os / editor
+.DS_Store
+.vscode/
+.idea/
