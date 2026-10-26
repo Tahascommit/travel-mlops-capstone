@@ -149,6 +149,32 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+  jenkins:
+    build: ./jenkins
+    image: travel-jenkins:2.580.1
+    container_name: jenkins
+    environment:
+      JAVA_OPTS: -Djenkins.install.runSetupWizard=false
+      CASC_JENKINS_CONFIG: /casc/casc.yaml
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:?set it in .env}
+      GIT_REPO_URL: https://github.com/Tahascommit/travel-mlops-capstone.git
+    ports:
+      - "127.0.0.1:8081:8080"
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - ./jenkins/casc.yaml:/casc/casc.yaml:ro
+      # lets the pipeline build images on docker desktop and deploy to its kubernetes cluster
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOME}/.kube/config:/kube/config:ro
+    # the docker socket belongs to group 0, this lets the jenkins user use it without running as root
+    group_add:
+      - "0"
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   mlflow-data:
   airflow-db:
+  jenkins-home:

@@ -1,0 +1,46 @@
+# Jenkins configuration as code: admin user, security and the pipeline job.
+# Loaded on every start, so the setup is the same each time the container is recreated.
+jenkins:
+  systemMessage: "Travel MLOps - CI/CD for the flight price API"
+  numExecutors: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: admin
+          name: admin
+          password: ${JENKINS_ADMIN_PASSWORD}
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: http://localhost:8081/
+
+jobs:
+  - script: |
+      pipelineJob('flight-price-cicd') {
+        description('Tests the code, packages the champion model from MLflow into the API image and deploys it to Kubernetes. Pipeline is defined in the Jenkinsfile in the repo.')
+        properties {
+          disableConcurrentBuilds()
+          pipelineTriggers {
+            triggers {
+              // check github for new commits every 5 minutes
+              pollSCM { scmpoll_spec('H/5 * * * *') }
+            }
+          }
+        }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { url('${GIT_REPO_URL}') }
+                branch('*/main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }
